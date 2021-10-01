@@ -1,5 +1,5 @@
 #!/bin/sh
-__version="1.1.0  2021-10-01"
+__version="1.1.1  2021-10-01"
 #
 # Copyright (c) 2021: Jacob.Lundqvist@gmail.com date se __version above
 # License: MIT
