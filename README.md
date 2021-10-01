@@ -50,7 +50,7 @@ is the case and all installed versions will be listed.
 If you suply a version, that versions man page will be displayed.
 
 Examples: man_asdf python
-          man_asdf python 3.9.1
+          man_asdf python 3.9.2
 ```
 
 
