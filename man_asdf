@@ -14,7 +14,10 @@ __version="1.1.0  2021-10-01"
 #
 # Displays version specific man pages for asdf items, that contains a man page
 #
-
+# TODO: 10-01  Find a tmux plugin where the bin is not named as the plugin,
+#              but it does have man pages, and see if that case can be handled.
+#              maven is one such where the bin is mvn,
+#              but since it doesnt have man pages, it isn't a good test candidate
 
 manpage="$1"
 alt_version="$2"
@@ -47,6 +50,7 @@ show_help() {
 #   Main
 #
 
+
 #
 #   No param or help requested
 #
@@ -61,13 +65,20 @@ if ! echo $(asdf plugin list) | grep -q "$manpage"; then
     exit 1
 fi
 
+#
 #   in case the cmd is not named as the plugin, this filters out the message:
 #   unknown command: X. Perhaps you have to reshim?
+#
 binary="$(asdf which $manpage 2> /dev/null)"
 
 base_path="${binary%/bin/*}"
 
 if [ -n "$alt_version" ]; then
+    if [ "$alt_version" = "system" ]; then
+	unset ASDF_DIR
+	man $manpage
+	exit
+    fi
     base_path="${ASDF_DIR}/installs/${manpage}/${alt_version}"
     if [ ! -d "$base_path" ]; then
 	echo "ERROR: $manpage version: $alt_version is not installed!"
@@ -81,6 +92,7 @@ elif echo $(asdf current "$manpage") | grep -q " system "; then
 else
     # check if there even is any man pages for this command
     version="$(asdf current "$manpage" | awk '{print $2}')"
+    echo "Displaying man page for version: $version"
     base_path="${ASDF_DIR}/installs/${manpage}/${version}"
 fi
 
@@ -112,9 +124,10 @@ if [ ! -f "${man_path}/man1/${manpage}" ]; then
 fi    
 
 cmd="man -M ${man_path} $manpage"
-echo ">> cmd [$cmd]"
+#echo ">> cmd [$cmd]"
 $cmd
 
+#
 #   TODO: 10-01  check if cmd succeeded or not, and if not
 #                display cmd and its error
 
