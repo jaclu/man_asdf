@@ -1,0 +1,121 @@
+#!/bin/sh
+#/usr/bin/env bash
+__version="1.1.0  2021-10-01"
+#
+# Copyright (c) 2021: Jacob.Lundqvist@gmail.com date se __version above
+# License: MIT
+#
+# Part of https://github.com/jaclu/helpfull_scripts
+#
+# Version: $__version
+#       Added display of alt_version and meaningful errors
+#       when no version was given and asdf current is system
+#   1.0.1  2021-09-28
+#       Initial release
+#
+# Displays version specific man pages for asdf items, that contains a man page
+#
+
+
+manpage="$1"
+alt_version="$2"
+
+man_holder="share/man"
+
+
+show_help() {
+    echo "man_asdf $__version"
+    echo
+    echo "Syntax:  man_asdf asdf_command [alt_version]"
+    echo "  alt_version must still be installed in order to be viewed!"
+    echo
+    echo "Displays man page asociated with an asdf command."
+    echo "Please note that not all asdf commands come with man pages"
+    echo "in such cases you will get an error about it."
+    echo
+    echo "If you give system as alt_version, the system man page will"
+    echo "be displayed, as long as it is found"
+    echo
+    echo "Examples: man_asdf tmux"
+    echo "          man_asdf tmux 3.2a"
+    echo "          man_asdf tmux system"
+}
+
+
+
+#================================================================
+#
+#   Main
+#
+
+#
+#   No param or help requested
+#
+case $manpage in
+    "" | "-h" | "--help" | "?" )
+	show_help
+	exit 1
+esac
+
+if ! echo $(asdf plugin list) | grep -q "$manpage"; then
+    echo "ERROR: not an asdf app!"
+    exit 1
+fi
+
+#   in case the cmd is not named as the plugin, this filters out the message:
+#   unknown command: X. Perhaps you have to reshim?
+binary="$(asdf which $manpage 2> /dev/null)"
+
+base_path="${binary%/bin/*}"
+
+if [ -n "$alt_version" ]; then
+    base_path="${ASDF_DIR}/installs/${manpage}/${alt_version}"
+    if [ ! -d "$base_path" ]; then
+	echo "ERROR: $manpage version: $alt_version is not installed!"
+	exit 1
+    fi
+elif echo $(asdf current "$manpage") | grep -q " system "; then
+    echo "ERROR: this is an asdf app, but you are using the system version!"
+    echo "       If you suply a version from below, you can see that versions man page"
+    asdf list $manpage
+    exit 1
+else
+    # check if there even is any man pages for this command
+    version="$(asdf current "$manpage" | awk '{print $2}')"
+    base_path="${ASDF_DIR}/installs/${manpage}/${version}"
+fi
+
+if [ -z "$base_path" ]; then
+    echo "ERROR: failed to find base path for: $manpage"
+    exit 1
+fi
+
+man_path="${base_path}/$man_holder"
+if [ ! -d "$man_path" ]; then
+    echo "ERROR: this asdf command does not seem to have any man page"
+    echo "       not found: $man_path"
+    exit 1
+fi
+
+#
+#   some packages like python has version numbers as appendix
+#   to the man page. If basename not found, try with first file found,
+#   and strip down any numbers to after the first dot.
+#
+if [ ! -f "${man_path}/man1/${manpage}" ]; then    
+    fname=$(ls "${man_path}/man1" | head -n 1)
+    # shorten multiple numbers to just one    
+    manpage="${fname%.*}"
+    if [ -z "$manpage" ]; then
+	echo "ERROR: manpage not found in ${man_path}/man1"
+	exit
+    fi
+fi    
+
+cmd="man -M ${man_path} $manpage"
+echo ">> cmd [$cmd]"
+$cmd
+
+#   TODO: 10-01  check if cmd succeeded or not, and if not
+#                display cmd and its error
+
