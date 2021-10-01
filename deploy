@@ -1,0 +1,20 @@
+#!/bin/sh
+
+if [ ! -f ".destination" ]; then
+    echo "If you put a destination dir in the file .destination"
+    echo "This deploy will use rsync and copy any updates to that location."
+    echo "Example:"
+    echo "  echo /usr/local/bin > .destination"
+    exit 1
+fi
+
+dest="$(cat .destination)"
+
+if [ ! -d "$dest" ]; then
+    echo "ERROR: The directory mentioned in .destination does not exist"
+    echo "       Supplied destination: $dest"
+    exit 1
+fi
+
+rsync -ahP man_asdf $dest
+
