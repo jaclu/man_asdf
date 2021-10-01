@@ -25,7 +25,7 @@ man_holder="share/man"
 show_help() {
     echo "man_asdf $__version"
     echo
-    echo "Syntax:  man_asdf asdf_command [alt_version]"
+    echo "Syntax:  man_asdf [-h --help] asdf_command [alt_version]"
     echo "  alt_version must still be installed in order to be viewed!"
     echo
     echo "Displays man page asociated with an asdf command."
