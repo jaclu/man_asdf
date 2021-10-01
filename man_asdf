@@ -33,14 +33,14 @@ show_help() {
     echo
     echo "Displays man page asociated with an asdf command."
     echo "Please note that not all asdf commands come with man pages"
-    echo "in such cases you will get an error about it."
+    echo "in such cases you will get a notification stating such."
     echo
-    echo "If you give system as alt_version, the system man page will"
-    echo "be displayed, as long as it is found"
+    echo "If current version is system, you will be informed that this"
+    echo "is the case and all installed versions will be listed."
+    echo "If you suply a version, that versions man page will be displayed."
     echo
-    echo "Examples: man_asdf tmux"
-    echo "          man_asdf tmux 3.2a"
-    echo "          man_asdf tmux system"
+    echo "Examples: man_asdf python"
+    echo "          man_asdf python 3.9.1"
 }
 
 
@@ -74,11 +74,6 @@ binary="$(asdf which $manpage 2> /dev/null)"
 base_path="${binary%/bin/*}"
 
 if [ -n "$alt_version" ]; then
-    if [ "$alt_version" = "system" ]; then
-	unset ASDF_DIR
-	man $manpage
-	exit
-    fi
     base_path="${ASDF_DIR}/installs/${manpage}/${alt_version}"
     if [ ! -d "$base_path" ]; then
 	echo "ERROR: $manpage version: $alt_version is not installed!"
