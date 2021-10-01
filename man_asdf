@@ -1,11 +1,10 @@
 #!/bin/sh
-#/usr/bin/env bash
 __version="1.1.0  2021-10-01"
 #
 # Copyright (c) 2021: Jacob.Lundqvist@gmail.com date se __version above
 # License: MIT
 #
-# Part of https://github.com/jaclu/helpfull_scripts
+# Part of https://github.com/jaclu/man_asdf
 #
 # Version: $__version
 #       Added display of alt_version and meaningful errors
