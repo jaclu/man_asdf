@@ -1,5 +1,5 @@
 #!/bin/sh
-__version="1.1.1  2021-10-01"
+__version="1.1.2  2021-10-20"
 #
 # Copyright (c) 2021: Jacob.Lundqvist@gmail.com date se __version above
 # License: MIT
@@ -7,6 +7,9 @@ __version="1.1.1  2021-10-01"
 # Part of https://github.com/jaclu/man_asdf
 #
 # Version: $__version
+#       Clarified helptext what is displayed if no version is specified.
+#
+#   1.1.1  2021-10-01
 #       Added display of alt_version and meaningful errors
 #       when no version was given and asdf current is system
 #   1.0.1  2021-09-28
@@ -38,9 +41,10 @@ show_help() {
     echo "If current version is system, you will be informed that this"
     echo "is the case and all installed versions will be listed."
     echo "If you suply a version, that versions man page will be displayed."
+    echo "When no version is specified, the current asdf version is assumed."
     echo
     echo "Examples: man_asdf python"
-    echo "          man_asdf python 3.9.1"
+    echo "          man_asdf python 3.9.7"
 }
 
 
