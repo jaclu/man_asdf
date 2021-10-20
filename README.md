@@ -1,13 +1,17 @@
 # man_asdf
-Display man page for installed versions of an asdf plugin.
+Display man page for installed versions of asdf plugins. (Asuming it provides a man page)
 
 ## Requirements
 
 - asdf (https://github.com/asdf-vm/asdf)
 
+- At least one plugin and version of that installed - otherwise there is nothing to show man pages for...
+
 ## Installation
 
-#### 1. Preparation
+Either softlink man_asdf to a PATH location, or if you want more control over what is in your path do as follows
+
+##### 1. Preparation
 
 Once you have entered the repo dir, designate destination by doing 
 
@@ -18,7 +22,7 @@ echo "/usr/local/bin" > .destination
 Replace destination path with your preference if you do not want to use
 /usr/local/bin
 
-#### 2. Deploy
+##### 2. Deploy
 
 Any time the repo is updated, all you need to do is this. 
 Since nothing will happen if there was no update, it is safe to always perform this step, in case you automate handling of this repo.
@@ -48,6 +52,7 @@ in such cases you will get a notification stating such.
 If current version is system, you will be informed that this
 is the case and all installed versions will be listed.
 If you suply a version, that versions man page will be displayed.
+When no version is specified, the current asdf version is assumed.
 
 Examples: man_asdf python
           man_asdf python 3.9.2
