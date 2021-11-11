@@ -16,5 +16,4 @@ if [ ! -d "$dest" ]; then
     exit 1
 fi
 
-rsync -ahP man_asdf $dest
-
+rsync -ahP --partial-dir /tmp  man_asdf $dest
