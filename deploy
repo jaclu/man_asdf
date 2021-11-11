@@ -17,6 +17,7 @@ if [ ! -d "$dest" ]; then
 fi
 
 
+echo
 echo "Deploying man_asdf"
 
 rsync -ahP --inplace  man_asdf $dest
