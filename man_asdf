@@ -125,8 +125,3 @@ fi
 cmd="man -M ${man_path} $manpage"
 #echo ">> cmd [$cmd]"
 $cmd
-
-#
-#   TODO: 10-01  check if cmd succeeded or not, and if not
-#                display cmd and its error
-
