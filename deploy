@@ -18,4 +18,4 @@ fi
 
 
 
-rsync -ahP --partial-dir /tmp  man_asdf $dest
+rsync -ahP --inplace  man_asdf $dest
