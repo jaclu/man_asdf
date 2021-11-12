@@ -41,7 +41,7 @@ If you dont have write privs to the destination. Further deploys will not need t
 
 ## Usage
 
-```bash
+```
 Syntax:  man_asdf [-h --help] asdf_command [alt_version]
   alt_version must still be installed in order to be viewed!
 
