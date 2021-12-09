@@ -60,9 +60,11 @@ show_help() {
 #   No param or help requested
 #
 case $manpage in
+
     "" | "-h" | "--help" | "?" )
-	show_help
-	exit 1
+        show_help
+        exit 1
+
 esac
 
 if ! echo $(asdf plugin list) | grep -q "$manpage"; then
@@ -79,10 +81,10 @@ binary="$(asdf which $manpage 2> /dev/null)"
 base_path="${binary%/bin/*}"
 
 if [ -n "$alt_version" ]; then
-    base_path="${ASDF_DIR}/installs/${manpage}/${alt_version}"
+    base_path="${ASDF_DATA_DIR}/installs/${manpage}/${alt_version}"
     if [ ! -d "$base_path" ]; then
-	echo "ERROR: $manpage version: $alt_version is not installed!"
-	exit 1
+        echo "ERROR: $manpage version: $alt_version is not installed!"
+        exit 1
     fi
 elif echo $(asdf current "$manpage") | grep -q " system "; then
     echo "ERROR: this is an asdf app, but you are using the system version!"
@@ -93,7 +95,7 @@ else
     # check if there even is any man pages for this command
     version="$(asdf current "$manpage" | awk '{print $2}')"
     echo "Displaying man page for version: $version"
-    base_path="${ASDF_DIR}/installs/${manpage}/${version}"
+    base_path="${ASDF_DATA_DIR}/installs/${manpage}/${version}"
 fi
 
 if [ -z "$base_path" ]; then
@@ -113,13 +115,13 @@ fi
 #   to the man page. If basename not found, try with first file found,
 #   and strip down any numbers to after the first dot.
 #
-if [ ! -f "${man_path}/man1/${manpage}" ]; then    
+if [ ! -f "${man_path}/man1/${manpage}" ]; then
     fname=$(ls "${man_path}/man1" | head -n 1)
-    # shorten multiple numbers to just one    
+    # shorten multiple numbers to just one
     manpage="${fname%.*}"
     if [ -z "$manpage" ]; then
-	echo "ERROR: manpage not found in ${man_path}/man1"
-	exit
+        echo "ERROR: manpage not found in ${man_path}/man1"
+        exit
     fi
 fi    
 
