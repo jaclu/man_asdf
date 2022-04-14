@@ -5,13 +5,13 @@
 #
 #  Part of https://github.com/jaclu/man_asdf
 #
-#  Version: 1.0.2 2022-04-14
+#  Version: 1.0.3 2022-04-14
 #
 
 #  shellcheck disable=SC1007
 CURRENT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
-conf_file="$CURRENT_DIR/.conf_file"
+conf_file="$CURRENT_DIR/.destination"
 
 if [ ! -f "$conf_file" ]; then
     echo "If you put a conf_file dir in the file $conf_file"
