@@ -40,6 +40,12 @@ sudo ./deploy
 
 If you don't have write privs to the destination. Further deploys will not need this since you are just updating this file, and it is owned by you.
 
+## Tested successfully with
+
+- nodejs
+- python
+- tmux
+
 ## Usage
 
 ```
