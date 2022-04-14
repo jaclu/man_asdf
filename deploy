@@ -5,7 +5,7 @@
 #
 #  Part of https://github.com/jaclu/man_asdf
 #
-#  Version: 1.0.3 2022-04-14
+#  Version: 1.0.4 2022-04-14
 #
 
 #  shellcheck disable=SC1007
@@ -32,4 +32,4 @@ fi
 echo
 echo "-----   Deploying man_asdf   -----"
 
-rsync -ahP --inplace  man_asdf "$dest"
+rsync -ahP --inplace  "$CURRENT_DIR"/man_asdf "$dest"
