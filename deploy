@@ -5,18 +5,23 @@
 #
 #  Part of https://github.com/jaclu/man_asdf
 #
-#  Version: 1.0.1 2022-04-14
+#  Version: 1.0.2 2022-04-14
 #
 
-if [ ! -f ".destination" ]; then
-    echo "If you put a destination dir in the file .destination"
+#  shellcheck disable=SC1007
+CURRENT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+conf_file="$CURRENT_DIR/.conf_file"
+
+if [ ! -f "$conf_file" ]; then
+    echo "If you put a conf_file dir in the file $conf_file"
     echo "This deploy will use rsync and copy any updates to that location."
     echo "Example:"
-    echo "  echo /usr/local/bin > .destination"
+    echo "  echo /usr/local/bin > $conf_file"
     exit 1
 fi
 
-dest="$(cat .destination)"
+dest="$(cat "$conf_file")"
 
 if [ ! -d "$dest" ]; then
     echo "ERROR: The directory mentioned in .destination does not exist"
@@ -24,9 +29,7 @@ if [ ! -d "$dest" ]; then
     exit 1
 fi
 
-
 echo
 echo "-----   Deploying man_asdf   -----"
-
 
 rsync -ahP --inplace  man_asdf "$dest"
