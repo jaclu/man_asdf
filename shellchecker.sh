@@ -5,7 +5,7 @@
 #
 #  Part of https://github.com/jaclu/man_asdf
 #
-#  Version: 1.0.1 2022-04-14
+#  Version: 1.0.2 2022-04-14
 #
 #  Does shellcheck on all relevant scripts in this project
 #
@@ -18,7 +18,7 @@ cd "$CURRENT_DIR" || return
 
 checkables=(
 
-    #  Obviousl self exam should be done :)
+    #  Obviously self exam should be done :)
     shellchecker.sh
 
     man_asdf
@@ -26,7 +26,7 @@ checkables=(
 )
 
 for script in "${checkables[@]}"; do
-    # abort as soon as one gives warnings
+    #  abort as soon as one gives warnings
     echo "Checking: $script"
     shellcheck -x "$script" || exit 1
 
