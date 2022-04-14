@@ -1,4 +1,12 @@
 #!/bin/sh
+#
+#  Copyright (c) 2021,2022: Jacob.Lundqvist@gmail.com
+#  License: MIT
+#
+#  Part of https://github.com/jaclu/man_asdf
+#
+#  Version: 1.0.1 2022-04-14
+#
 
 if [ ! -f ".destination" ]; then
     echo "If you put a destination dir in the file .destination"
@@ -21,4 +29,4 @@ echo
 echo "-----   Deploying man_asdf   -----"
 
 
-rsync -ahP --inplace  man_asdf $dest
+rsync -ahP --inplace  man_asdf "$dest"

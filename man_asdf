@@ -1,18 +1,19 @@
 #!/bin/sh
-__version="1.1.3  2021-11-11"
+__version="1.1.4  2022-04-14"
 #
-# Copyright (c) 2021: Jacob.Lundqvist@gmail.com
-# License: MIT
+#  Copyright (c) 2021,2022: Jacob.Lundqvist@gmail.com
+#  License: MIT
 #
-# Part of https://github.com/jaclu/man_asdf
+#  Part of https://github.com/jaclu/man_asdf
 #
 #
-# Displays version specific man pages for asdf items, that contains a man page
+#  Displays version specific man pages for asdf items, that contains a man page
 #
-# TODO: 10-01  Find a tmux plugin where the bin is not named as the plugin,
-#              but it does have man pages, and see if that case can be handled.
-#              maven is one such where the bin is mvn,
-#              but since it doesn't have man pages, it isn't a good test candidate
+#  TODO: 21-10-01 Find a tmux plugin where the bin is not named as the plugin,
+#                 but it does have man pages, and see if that case can be handled.
+#                 maven is one such where the bin is mvn,
+#                 but since it doesn't have man pages, it isn't a good test candidate
+#
 
 manpage="$1"
 alt_version="$2"
@@ -58,16 +59,16 @@ case $manpage in
 
 esac
 
-if ! echo $(asdf plugin list) | grep -q "$manpage"; then
+if ! asdf plugin list | grep -q "$manpage"; then
     echo "ERROR: not an asdf app!"
     exit 1
 fi
 
 #
-#   in case the cmd is not named as the plugin, this filters out the message:
-#   unknown command: X. Perhaps you have to reshim?
+#  in case the cmd is not named as the plugin, this filters out the message:
+#  unknown command: X. Perhaps you have to reshim?
 #
-binary="$(asdf which $manpage 2> /dev/null)"
+binary="$(asdf which "$manpage" 2> /dev/null)"
 
 base_path="${binary%/bin/*}"
 
@@ -77,10 +78,10 @@ if [ -n "$alt_version" ]; then
         echo "ERROR: $manpage version: $alt_version is not installed!"
         exit 1
     fi
-elif echo $(asdf current "$manpage") | grep -q " system "; then
+elif asdf current "$manpage" | grep -q " system "; then
     echo "ERROR: this is an asdf app, but you are using the system version!"
     echo "       If you supply a version from below, you can see that versions man page"
-    asdf list $manpage
+    asdf list "$manpage"
     exit 1
 else
     # check if there even is any man pages for this command
@@ -102,12 +103,18 @@ if [ ! -d "$man_path" ]; then
 fi
 
 #
-#   some packages like python has version numbers as appendix
-#   to the man page. If basename not found, try with first file found,
-#   and strip down any numbers to after the first dot.
+#  some packages like python has version numbers as appendix
+#  to the man page. If basename not found, try with first file found,
+#  and strip down any numbers to after the first dot.
 #
 if [ ! -f "${man_path}/man1/${manpage}" ]; then
+    #
+    #  22-04-14 shell check recommends to use find over ls, but so far
+    #  I have failed to figure out proper syntax for that...
+    #
+    #  shellcheck disable=SC2012
     fname=$(ls "${man_path}/man1" | head -n 1)
+
     # shorten multiple numbers to just one
     manpage="${fname%.*}"
     if [ -z "$manpage" ]; then
