@@ -1,5 +1,5 @@
 #!/bin/sh
-__version="1.1.4  2022-04-14"
+__version="1.2.0  2022-06-29"
 #
 #  Copyright (c) 2021,2022: Jacob.Lundqvist@gmail.com
 #  License: MIT
@@ -58,6 +58,16 @@ case $manpage in
         exit 1
 
 esac
+
+
+#
+#  If asdf is not active but found in its usual place, use that to try to
+#  find man page
+#
+if [ -z "$ASDF_DATA_DIR" ] && [ -d "$HOME/.asdf" ]; then
+    ASDF_DATA_DIR="$HOME/.asdf"
+fi
+
 
 if ! asdf plugin list | grep -q "$manpage"; then
     echo "ERROR: not an asdf app!"
