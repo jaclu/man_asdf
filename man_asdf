@@ -136,3 +136,4 @@ fi
 
 cmd="man -M ${man_path} $manpage"
 $cmd
+echo "Displapyed man page for version $alt_version"
