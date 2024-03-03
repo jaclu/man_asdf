@@ -1,4 +1,4 @@
-# man_asdf
+#Man_asdf
 
 Display man page for installed versions of asdf plugins. (Assuming it provides a man page)
 
@@ -14,7 +14,7 @@ Either softlink man_asdf to a PATH location, or if you want more control over wh
 
 ##### 1. Preparation
 
-Once you have entered the repo dir, designate destination by doing
+Once you have entered the repository dir, designate destination by doing
 
 ```bash
 echo "/usr/local/bin" > .destination
@@ -25,8 +25,8 @@ Replace destination path with your preference if you do not want to use
 
 ##### 2. Deploy
 
-Any time the repo is updated, all you need to do is this.
-Since nothing will happen if there was no update, it is safe to always perform this step, in case you automate handling of this repo.
+Any time the repository is updated, all you need to do is this.
+Since nothing will happen if there was no update, it is safe to always perform this step, in case you automate handling of this repository.
 
 ```bash
 ./deploy
