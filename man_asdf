@@ -1,7 +1,7 @@
 #!/bin/sh
-__version="1.2.0  2022-06-29"
+__version="2.0  2024-10-09"
 #
-#  Copyright (c) 2021,2022: Jacob.Lundqvist@gmail.com
+#  Copyright (c) 2021,2022,2024: Jacob.Lundqvist@gmail.com
 #  License: MIT
 #
 #  Part of https://github.com/jaclu/man_asdf
@@ -15,31 +15,39 @@ __version="1.2.0  2022-06-29"
 #                 but since it doesn't have man pages, it isn't a good test candidate
 #
 
-manpage="$1"
-alt_version="$2"
-
-man_holder="share/man"
+error_msg() {
+    msg="$1"
+    [ -z "$msg" ] && msg "error_msg called without msg"
+    echo "ERROR: $msg"
+    exit 1
+}
 
 
 show_help() {
-    echo "man_asdf $__version"
+    echo "$prog_name $__version"
     echo
-    echo "Syntax:  man_asdf [-h --help] asdf_command [alt_version]"
+    echo "Syntax:  $prog_name [-h --help] page [alt_version]"
     echo "  alt_version must still be installed in order to be viewed!"
     echo
-    echo "Displays man page associated with an asdf command."
+    echo "If page was not an asdf_comman, the system man is used instead"
+    echo "So this can be named man and put in path before the normal man"
+    echo
+    echo "If this is an asdf command, its man page will be displayed"
     echo "Please note that not all asdf commands come with man pages"
     echo "in such cases you will get a notification stating such."
     echo
-    echo "If current version is system, you will be informed that this"
-    echo "is the case and all installed versions will be listed."
     echo "If you supply a version, that versions man page will be displayed."
     echo "When no version is specified, the current asdf version is assumed."
     echo
     echo "Examples: man_asdf python"
     echo "          man_asdf python 3.9.7"
+    echo "          man_asdf python system"
 }
 
+display_system_man_page() {
+    $real_man "$man_page"
+    exit 0
+}
 
 
 #================================================================
@@ -47,18 +55,30 @@ show_help() {
 #   Main
 #
 
+prog_name=$(basename "$0")
+man_page="$1"
+alt_version="$2"
 
-#
-#   No param or help requested
-#
-case $manpage in
+# ignore any aliases and skip this custom man, find the real one
+# shellcheck disable=SC2230
+real_man="$(which -a man | grep ^/ | grep -v "$0"| tail -n 1)"
+[ -z "$real_man" ] && error_msg "no system man found"
 
+man_base_path="share/man"
+
+case $man_page in
     "" | "-h" | "--help" | "?" )
+        #
+        #   No param or help requested
+        #
         show_help
         exit 1
-
+        ;;
+    *) ;;
 esac
 
+# asdf not active, use regular man
+command -v asdf >/dev/null || display_system_man_page
 
 #
 #  If asdf is not active but found in its usual place, use that to try to
@@ -68,72 +88,45 @@ if [ -z "$ASDF_DATA_DIR" ] && [ -d "$HOME/.asdf" ]; then
     ASDF_DATA_DIR="$HOME/.asdf"
 fi
 
-
-if ! asdf plugin list | grep -q "$manpage"; then
-    echo "ERROR: not an asdf app!"
-    exit 1
+if ! asdf plugin list | grep -q "$man_page"; then
+    # was not an asdf cmd
+    display_system_man_page
 fi
+
 
 #
 #  in case the cmd is not named as the plugin, this filters out the message:
 #  unknown command: X. Perhaps you have to reshim?
 #
-binary="$(asdf which "$manpage" 2> /dev/null)"
-
-base_path="${binary%/bin/*}"
+_b="$(asdf which "$man_page" 2> /dev/null)"
+bp_tmux_cmd="${_b%/bin/*}"
 
 if [ -n "$alt_version" ]; then
-    base_path="${ASDF_DATA_DIR}/installs/${manpage}/${alt_version}"
-    if [ ! -d "$base_path" ]; then
-        echo "ERROR: $manpage version: $alt_version is not installed!"
-        exit 1
+    if [ "$alt_version" = "system" ]; then
+        display_system_man_page
     fi
-elif asdf current "$manpage" | grep -q " system "; then
-    echo "ERROR: this is an asdf app, but you are using the system version!"
-    echo "       If you supply a version from below, you can see that versions man page"
-    asdf list "$manpage"
-    exit 1
+    version="$alt_version"
+    bp_tmux_cmd="${ASDF_DATA_DIR}/installs/${man_page}/${version}"
+    if [ ! -d "$bp_tmux_cmd" ]; then
+        error_msg "$man_page version: $version is not installed!"
+    fi
+elif asdf current "$man_page" | grep -q " system "; then
+    display_system_man_page
 else
     # check if there even is any man pages for this command
-    version="$(asdf current "$manpage" | awk '{print $2}')"
-    echo "Displaying man page for version: $version"
-    base_path="${ASDF_DATA_DIR}/installs/${manpage}/${version}"
+    version="$(asdf current "$man_page" | awk '{print $2}')"
+    bp_tmux_cmd="${ASDF_DATA_DIR}/installs/${man_page}/${version}"
 fi
 
-if [ -z "$base_path" ]; then
-    echo "ERROR: failed to find base path for: $manpage"
-    exit 1
-fi
+[ -z "$bp_tmux_cmd" ] && error_msg "failed to find base path for: $man_page"
 
-man_path="${base_path}/$man_holder"
-if [ ! -d "$man_path" ]; then
-    echo "ERROR: this asdf command does not seem to have any man page"
-    echo "       not found: $man_path"
-    exit 1
-fi
+man_path="${bp_tmux_cmd}/$man_base_path"
+[ ! -d "$man_path" ] && {
+    error_msg "this asdf command does not seem to have any man page"
+}
 
-#
-#  some packages like python has version numbers as appendix
-#  to the man page. If basename not found, try with first file found,
-#  and strip down any numbers to after the first dot.
-#
-if [ ! -f "${man_path}/man1/${manpage}" ]; then
-    #
-    #  22-04-14 shell check recommends to use find over ls, but so far
-    #  I have failed to figure out proper syntax for that...
-    #
-    #  shellcheck disable=SC2012
-    fname=$(ls "${man_path}/man1" | head -n 1)
+f_man=$(find "${man_path}/man1" -mindepth 1  -print -quit)
+[ -z "$f_man" ] && error_msg "man_page not found in ${man_path}/man1"
 
-    # shorten multiple numbers to just one
-    manpage="${fname%.*}"
-    if [ -z "$manpage" ]; then
-        echo "ERROR: manpage not found in ${man_path}/man1"
-        exit
-    fi
-fi
-
-
-cmd="man -M ${man_path} $manpage"
-$cmd
-echo "Displapyed man page for version $alt_version"
+echo "Displaying asdf man page for: $man_page $version"
+$real_man -M "$man_path" "$f_man" 

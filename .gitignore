@@ -1,3 +1,4 @@
 .destination
 *~
-.shellchecker.cache
+.cache.olint
+
