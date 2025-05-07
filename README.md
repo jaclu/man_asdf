@@ -1,16 +1,19 @@
 # Man_asdf
 
-Display man page for installed versions of asdf plugins. (Assuming it provides a man page)
+Display man page for installed versions of asdf plugins.
+(Assuming it provides a man page)
 
 ## Requirements
 
 - asdf [asdf GitHub page](https://github.com/asdf-vm/asdf)
 
-- At least one plugin and version of that installed - otherwise there is nothing to show man pages for...
+- At least one plugin and version of that installed - otherwise there is
+nothing to show man pages for...
 
 ## Installation
 
-Either softlink man_asdf to a PATH location, or if you want more control over what is in your path do as follows
+Either softlink man_asdf to a PATH location, or if you want more control over
+what is in your path do as follows
 
 ### 1. Preparation
 
@@ -26,7 +29,8 @@ Replace destination path with your preference if you do not want to use
 ### 2. Deploy
 
 Any time the repository is updated, all you need to do is this.
-Since nothing will happen if there was no update, it is safe to always perform this step, in case you automate handling of this repository.
+Since nothing will happen if there was no update, it is safe to always perform
+this step, in case you automate handling of this repository.
 
 ```bash
 ./deploy
@@ -38,7 +42,8 @@ First time you might need to do
 sudo ./deploy
 ```
 
-If you don't have write privs to the destination. Further deploys will not need this since you are just updating this file, and it is owned by you.
+If you don't have write privs to the destination. Further deploys will not
+need this since you are just updating this file, and it is owned by you.
 
 ## Tested successfully with
 
