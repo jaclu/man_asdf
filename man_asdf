@@ -115,6 +115,10 @@ elif asdf current "$man_page" | grep -q " system "; then
 else
     # check if there even is any man pages for this command
     version="$(asdf current "$man_page" | awk '{print $2}')"
+
+    # if alt_version not given, use default
+    [ "$man_page" = tmux ] && [ -z "$alt_version" ] && version=3.5a
+
     bp_tmux_cmd="${ASDF_DATA_DIR}/installs/${man_page}/${version}"
 fi
 

@@ -39,7 +39,7 @@ f_man="$d_dest"/man
 
 rsync -ahP --inplace  "$f_src" "$f_man_asdf" | grep -v "sending incremental file list"
 if [ -f "$f_man_asdf" ]; then
-    ln -sf "f_man_asdf" "$f_man"
+    ln -sf "$f_man_asdf" "$f_man"
     [ -L "$f_man" ] || {
         echo "ERROR: failed to create symbolick link $f_man"
         exit 1
