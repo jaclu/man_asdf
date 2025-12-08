@@ -118,7 +118,7 @@ else
 
     # if alt_version not given, use default
     [ "$man_page" = tmux ] && [ -z "$alt_version" ] && {
-        version=$(tmux -V | cut -d' ' -f2)
+        version=$(${TMUX_BIN:-tmux} -V | cut -d' ' -f2)
     }
     bp_tmux_cmd="${ASDF_DATA_DIR}/installs/${man_page}/${version}"
 fi
