@@ -22,7 +22,6 @@ error_msg() {
     exit 1
 }
 
-
 show_help() {
     echo "$prog_name $__version"
     echo
@@ -49,7 +48,6 @@ display_system_man_page() {
     exit 0
 }
 
-
 #================================================================
 #
 #   Main
@@ -61,13 +59,13 @@ alt_version="$2"
 
 # ignore any aliases and skip this custom man, find the real one
 # shellcheck disable=SC2230
-real_man="$(which -a man | grep ^/ | grep -v "$0"| tail -n 1)"
+real_man="$(which -a man | grep ^/ | grep -v "$0" | tail -n 1)"
 [ -z "$real_man" ] && error_msg "no system man found"
 
 man_base_path="share/man"
 
 case $man_page in
-    "" | "-h" | "--help" | "?" )
+    "" | "-h" | "--help" | "?")
         #
         #   No param or help requested
         #
@@ -93,12 +91,11 @@ if ! asdf plugin list | grep -q "$man_page"; then
     display_system_man_page
 fi
 
-
 #
 #  in case the cmd is not named as the plugin, this filters out the message:
 #  unknown command: X. Perhaps you have to reshim?
 #
-_b="$(asdf which "$man_page" 2> /dev/null)"
+_b="$(asdf which "$man_page" 2>/dev/null)"
 bp_tmux_cmd="${_b%/bin/*}"
 
 if [ -n "$alt_version" ]; then
@@ -130,8 +127,8 @@ man_path="${bp_tmux_cmd}/$man_base_path"
     error_msg "this asdf command does not seem to have any man page"
 }
 
-f_man=$(find "${man_path}/man1" -mindepth 1  -print -quit)
+f_man=$(find "${man_path}/man1" -mindepth 1 -print -quit)
 [ -z "$f_man" ] && error_msg "man_page not found in ${man_path}/man1"
 
 echo "Displaying asdf man page for: $man_page $version"
-$real_man -M "$man_path" "$f_man" 
+$real_man -M "$man_path" "$f_man"
