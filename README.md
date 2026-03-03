@@ -60,7 +60,7 @@ need this since you are just updating this file, and it is owned by you.
 
 ```text
 Syntax:  man-asdf [-h --help] page [alt_version]
-     OR: man-asdf {options and params just like for normal man}
+    OR:  man-asdf {options and params just like for normal man}
 
 If page was not an asdf_comman, the system man is used instead,
 with full cmd line, So this can be a symbolic link for `man`
