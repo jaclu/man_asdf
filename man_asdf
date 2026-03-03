@@ -1,7 +1,7 @@
 #!/bin/sh
-__version="2.0  2024-10-09"
+__version="3.0  2026-03-03"
 #
-#  Copyright (c) 2021,2022,2024: Jacob.Lundqvist@gmail.com
+#  Copyright (c) 2021,2022,2024,2026: Jacob.Lundqvist@gmail.com
 #  License: MIT
 #
 #  Part of https://github.com/jaclu/man_asdf
@@ -28,8 +28,9 @@ show_help() {
     echo "Syntax:  $prog_name [-h --help] page [alt_version]"
     echo "  alt_version must still be installed in order to be viewed!"
     echo
-    echo "If page was not an asdf_comman, the system man is used instead"
-    echo "So this can be named man and put in path before the normal man"
+    echo "If page was not an asdf_comman, the system man is used instead,"
+    echo "with full cmd line, So this can be soft-linked as man"
+    echo " and put in path before the normal man"
     echo
     echo "If this is an asdf command, its man page will be displayed"
     echo "Please note that not all asdf commands come with man pages"
@@ -43,9 +44,106 @@ show_help() {
     echo "          man_asdf python system"
 }
 
-display_system_man_page() {
-    $real_man "$man_page"
-    exit 0
+orig_man() {
+    $real_man "$@"
+    exit $?
+}
+
+parse_and_dispatch() {
+    man_base_path="share/man"
+
+    # Work on a local copy
+    set -- "$@"
+
+    while [ -n "$1" ]; do
+        case "$1" in
+            "" | "-h" | "--help" | "?")
+                # No param or help requested
+                show_help
+                exit 1
+                ;;
+            -*)
+                # Unknown option, assume its a call to real man and return
+                # without asdf man processing over-head
+                return "$use_orig_man_ex_code"
+                ;;
+
+            [0-9])
+                # Single digit, assume it is man section
+                man_section="$1"
+                ;;
+
+            *)
+                # handle params relevant for man_asdf, if system man is used
+                # it will receive all params from the command line
+                man_page="$1"
+                alt_version="$2" # can be empty
+                break            # no more options to give
+                ;;
+        esac
+        shift
+    done
+
+    # If asdf not active, use regular man
+    command -v asdf >/dev/null || return "$use_orig_man_ex_code"
+
+    #
+    #  If asdf is not active but found in its usual place, use that to try to
+    #  find man page
+    #
+    if [ -z "$ASDF_DATA_DIR" ] && [ -d "$HOME/.asdf" ]; then
+        ASDF_DATA_DIR="$HOME/.asdf"
+    fi
+
+    if ! asdf plugin list | grep -q "$man_page"; then
+        # was not an asdf cmd
+        return "$use_orig_man_ex_code"
+    fi
+
+    #
+    #  in case the cmd is not named as the plugin, this filters out the message:
+    #  unknown command: X. Perhaps you have to reshim?
+    #
+    _b="$(asdf which "$man_page" 2>/dev/null)"
+    bp_tmux_cmd="${_b%/bin/*}"
+
+    if [ -n "$alt_version" ]; then
+        if [ "$alt_version" = "system" ]; then
+            # use regular man if system version is requested
+            echo "Calling system man for $man_page"
+            orig_man "$man_page"
+        fi
+        version="$alt_version"
+        bp_tmux_cmd="${ASDF_DATA_DIR}/installs/${man_page}/${version}"
+        if [ ! -d "$bp_tmux_cmd" ]; then
+            error_msg "$man_page version: $version is not installed!"
+        fi
+    elif asdf current "$man_page" | grep -q " system "; then
+        # use regular man if system version is the current one
+        return "$use_orig_man_ex_code"
+    else
+        # check if there even is any man pages for this command
+        version="$(asdf current "$man_page" | grep -v ^Name | awk '{print $2}')"
+
+        # if alt_version not given, use default
+        [ "$man_page" = tmux ] && [ -z "$alt_version" ] && {
+            version=$(${TMUX_BIN:-tmux} -V | cut -d' ' -f2)
+        }
+        bp_tmux_cmd="${ASDF_DATA_DIR}/installs/${man_page}/${version}"
+    fi
+
+    [ -z "$bp_tmux_cmd" ] && error_msg "failed to find base path for: $man_page"
+
+    man_path="${bp_tmux_cmd}/$man_base_path"
+    [ ! -d "$man_path" ] && {
+        error_msg "this asdf command does not seem to have any man page"
+    }
+
+    f_man=$(find "${man_path}/man1" -mindepth 1 -print -quit)
+    [ -z "$f_man" ] && error_msg "man_page not found in ${man_path}/man1"
+
+    echo "Displaying asdf man page for: $man_page $version"
+    $real_man -M "$man_path" "$man_section" "$f_man"
 }
 
 #================================================================
@@ -54,81 +152,21 @@ display_system_man_page() {
 #
 
 prog_name=$(basename "$0")
-man_page="$1"
-alt_version="$2"
+use_orig_man_ex_code=43
 
 # ignore any aliases and skip this custom man, find the real one
 # shellcheck disable=SC2230
 real_man="$(which -a man | grep ^/ | grep -v "$0" | tail -n 1)"
-[ -z "$real_man" ] && error_msg "no system man found"
+[ -z "$real_man" ] && error_msg "no system man command found"
 
-man_base_path="share/man"
-
-case $man_page in
-    "" | "-h" | "--help" | "?")
-        #
-        #   No param or help requested
-        #
-        show_help
-        exit 1
+# First try custom handler
+parse_and_dispatch "$@"
+ex_code="$?"
+case "$ex_code" in
+    "$use_orig_man_ex_code")
+        echo "Calling system man with full cmd line"
+        orig_man "$@"
         ;;
-    *) ;;
+    0) ;; # asdf man page was displayed with no errors
+    *) error_msg "Uncaught man_asdf error: $ex_code" ;;
 esac
-
-# asdf not active, use regular man
-command -v asdf >/dev/null || display_system_man_page
-
-#
-#  If asdf is not active but found in its usual place, use that to try to
-#  find man page
-#
-if [ -z "$ASDF_DATA_DIR" ] && [ -d "$HOME/.asdf" ]; then
-    ASDF_DATA_DIR="$HOME/.asdf"
-fi
-
-if ! asdf plugin list | grep -q "$man_page"; then
-    # was not an asdf cmd
-    display_system_man_page
-fi
-
-#
-#  in case the cmd is not named as the plugin, this filters out the message:
-#  unknown command: X. Perhaps you have to reshim?
-#
-_b="$(asdf which "$man_page" 2>/dev/null)"
-bp_tmux_cmd="${_b%/bin/*}"
-
-if [ -n "$alt_version" ]; then
-    if [ "$alt_version" = "system" ]; then
-        display_system_man_page
-    fi
-    version="$alt_version"
-    bp_tmux_cmd="${ASDF_DATA_DIR}/installs/${man_page}/${version}"
-    if [ ! -d "$bp_tmux_cmd" ]; then
-        error_msg "$man_page version: $version is not installed!"
-    fi
-elif asdf current "$man_page" | grep -q " system "; then
-    display_system_man_page
-else
-    # check if there even is any man pages for this command
-    version="$(asdf current "$man_page" | awk '{print $2}')"
-
-    # if alt_version not given, use default
-    [ "$man_page" = tmux ] && [ -z "$alt_version" ] && {
-        version=$(${TMUX_BIN:-tmux} -V | cut -d' ' -f2)
-    }
-    bp_tmux_cmd="${ASDF_DATA_DIR}/installs/${man_page}/${version}"
-fi
-
-[ -z "$bp_tmux_cmd" ] && error_msg "failed to find base path for: $man_page"
-
-man_path="${bp_tmux_cmd}/$man_base_path"
-[ ! -d "$man_path" ] && {
-    error_msg "this asdf command does not seem to have any man page"
-}
-
-f_man=$(find "${man_path}/man1" -mindepth 1 -print -quit)
-[ -z "$f_man" ] && error_msg "man_page not found in ${man_path}/man1"
-
-echo "Displaying asdf man page for: $man_page $version"
-$real_man -M "$man_path" "$f_man"
