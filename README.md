@@ -2,6 +2,7 @@
 
 Display man page for installed versions of asdf plugins.
 (Assuming it provides a man page)
+If no matching asdf command is found the entire command line is handed to the system man, so this can be soft-linked as `man` and be put before sys bins in the path, and handle all man calls!
 
 ## Requirements
 
@@ -54,6 +55,25 @@ need this since you are just updating this file, and it is owned by you.
 ## Usage
 
 ```text
+Syntax:  man [-h --help] page [alt_version]
+  alt_version must still be installed in order to be viewed!
+
+If page was not an asdf_comman, the system man is used instead,
+with full cmd line, So this can be soft-linked as man
+ and put in PATH before the normal man
+
+If this is an asdf command, its man page will be displayed
+Please note that not all asdf commands come with man pages
+in such cases you will get a notification stating such.
+
+If you supply a version, that versions man page will be displayed.
+When no version is specified, the current asdf version is assumed.
+
+Examples: man_asdf python
+          man_asdf python 3.9.7
+          man_asdf python system
+
+
 Syntax:  man_asdf [-h --help] asdf_command [alt_version]
   alt_version must still be installed in order to be viewed!
 
