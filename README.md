@@ -2,14 +2,16 @@
 
 Display man page for installed versions of asdf plugins.
 (Assuming it provides a man page)
-If no matching asdf command is found the entire command line is handed to the system man, so this can be soft-linked as `man` and be put before sys bins in the path, and handle all man calls!
+If no matching asdf command is found the entire command line is handed to the
+system man, so this can be soft-linked as `man` and be put before sys bins
+in the path, and handle all man calls!
 
 ## Requirements
 
 - asdf [asdf GitHub page](https://github.com/asdf-vm/asdf)
 
 - At least one plugin and version of that installed - otherwise there is
-nothing to show man pages for...
+  nothing to show man pages for...
 
 ## Installation
 
