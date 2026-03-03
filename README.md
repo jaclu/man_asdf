@@ -3,7 +3,7 @@
 Display man page for installed versions of asdf plugins.
 (Assuming it provides a man page)
 If no matching asdf command is found the entire command line is handed to the
-system man, so this can be soft-linked as `man` and be put before sys bins
+system man, so `man-asdf` can be soft-linked as `man` and be put before sys bins
 in the path, and handle all man calls!
 
 ## Requirements
@@ -15,7 +15,7 @@ in the path, and handle all man calls!
 
 ## Installation
 
-Either softlink man_asdf to a PATH location, or if you want more control over
+Either softlink man-asdf to a PATH location, or if you want more control over
 what is in your path do as follows
 
 ### 1. Preparation
@@ -31,7 +31,9 @@ Replace destination path with your preference if you do not want to use
 
 ### 2. Deploy
 
-Any time the repository is updated, all you need to do is this.
+Any time the repository is updated, and you want to use this new version,
+all you need to do is this:
+
 Since nothing will happen if there was no update, it is safe to always perform
 this step, in case you automate handling of this repository.
 
@@ -57,12 +59,12 @@ need this since you are just updating this file, and it is owned by you.
 ## Usage
 
 ```text
-Syntax:  man [-h --help] page [alt_version]
-  alt_version must still be installed in order to be viewed!
+Syntax:  man-asdf [-h --help] page [alt_version]
+     OR: man-asdf {options and params just like for normal man}
 
 If page was not an asdf_comman, the system man is used instead,
-with full cmd line, So this can be soft-linked as man
- and put in PATH before the normal man
+with full cmd line, So this can be a symbolic link for `man`
+and put in PATH before the normal `man`
 
 If this is an asdf command, its man page will be displayed
 Please note that not all asdf commands come with man pages
@@ -71,25 +73,9 @@ in such cases you will get a notification stating such.
 If you supply a version, that versions man page will be displayed.
 When no version is specified, the current asdf version is assumed.
 
-Examples: man_asdf python
-          man_asdf python 3.9.7
-          man_asdf python system
-
-
-Syntax:  man_asdf [-h --help] asdf_command [alt_version]
-  alt_version must still be installed in order to be viewed!
-
-Displays man page associated with an asdf command.
-Please note that not all asdf commands come with man pages
-in such cases you will get a notification stating such.
-
-If current version is system, you will be informed that this
-is the case and all installed versions will be listed.
-If you supply a version, that versions man page will be displayed.
-When no version is specified, the current asdf version is assumed.
-
-Examples: man_asdf python
-          man_asdf python 3.9.2
+Examples: man-asdf python
+          man-asdf python 3.9.7
+          man-asdf python system
 ```
 
 As always any feedback is welcome!

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  Copyright (c) 2021,2022: Jacob.Lundqvist@gmail.com
+#  Copyright (c) 2021,2022,2026: Jacob.Lundqvist@gmail.com
 #  License: MIT
 #
 #  Part of https://github.com/jaclu/man_asdf
@@ -8,10 +8,14 @@
 #  Version: 1.0.4 2022-04-14
 #
 
+cmd_man="man-asdf"
+old_cmd_man="man_asdf"
+
 #  shellcheck disable=SC1007
 CURRENT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 conf_file="$CURRENT_DIR/.destination"
+f_src="$CURRENT_DIR/$cmd_man"
 
 if [ ! -f "$conf_file" ]; then
     echo "If you put a conf_file dir in the file $conf_file"
@@ -22,6 +26,9 @@ if [ ! -f "$conf_file" ]; then
 fi
 
 d_dest="$(cat "$conf_file")"
+f_man_asdf="$d_dest/$cmd_man"
+f_old_man_asdf="$d_dest/$old_cmd_man"
+f_man="$d_dest"/man
 
 if [ ! -d "$d_dest" ]; then
     echo "ERROR: The directory mentioned in .destination does not exist"
@@ -30,12 +37,13 @@ if [ ! -d "$d_dest" ]; then
 fi
 
 echo
-echo "-----   Deploying man_asdf   -----"
+echo "-----   Deploying $cmd_man   -----"
 
-cmd_man="man_asdf"
-f_src="$CURRENT_DIR/$cmd_man"
-f_man_asdf="$d_dest/$cmd_man"
-f_man="$d_dest"/man
+[ -f "$f_old_man_asdf" ] && {
+    echo "WARNING: cmd has been renamed from man_asdf into $cmd_man"
+    echo "         However the old command is present: $f_old_man_asdf"
+    echo
+}
 
 rsync -ahP --inplace "$f_src" "$f_man_asdf" | grep -v "sending incremental file list"
 if [ -f "$f_man_asdf" ]; then

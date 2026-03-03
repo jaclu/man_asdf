@@ -1,5 +1,4 @@
 #!/bin/sh
-__version="3.0  2026-03-03"
 #
 #  Copyright (c) 2021,2022,2024,2026: Jacob.Lundqvist@gmail.com
 #  License: MIT
@@ -22,14 +21,18 @@ error_msg() {
     exit 1
 }
 
+dbg_display() {
+    name=$1
+    [ -n "$name" ] || error_msg "dbg_display called with no param"
+    eval "printf '><> %s: %s\n' \"\$name\" \"\${$name}\""
+}
+
 show_help() {
-    echo "$prog_name $__version"
-    echo
     echo "Syntax:  $prog_name [-h --help] page [alt_version]"
-    echo "  alt_version must still be installed in order to be viewed!"
+    echo "    OR:  man-asdf {options and params just like for normal man}"
     echo
     echo "If page was not an asdf_comman, the system man is used instead,"
-    echo "with full cmd line, So this can be soft-linked as man"
+    echo "with full cmd line, So this can be a symbolic link for man"
     echo " and put in path before the normal man"
     echo
     echo "If this is an asdf command, its man page will be displayed"
@@ -39,9 +42,9 @@ show_help() {
     echo "If you supply a version, that versions man page will be displayed."
     echo "When no version is specified, the current asdf version is assumed."
     echo
-    echo "Examples: man_asdf python"
-    echo "          man_asdf python 3.9.7"
-    echo "          man_asdf python system"
+    echo "Examples: $prog_name python"
+    echo "          $prog_name python 3.9.7"
+    echo "          $prog_name python system"
 }
 
 orig_man() {
@@ -74,7 +77,7 @@ parse_and_dispatch() {
                 ;;
 
             *)
-                # handle params relevant for man_asdf, if system man is used
+                # handle params relevant for man-asdf, if system man is used
                 # it will receive all params from the command line
                 man_page="$1"
                 alt_version="$2" # can be empty
@@ -85,8 +88,10 @@ parse_and_dispatch() {
     done
 
     # If asdf not active, use regular man
-    command -v asdf >/dev/null || return "$use_orig_man_ex_code"
-
+    command -v asdf >/dev/null || {
+        echo "Asdf not found, using this man is pointless..."
+        return "$use_orig_man_ex_code"
+    }
     #
     #  If asdf is not active but found in its usual place, use that to try to
     #  find man page
@@ -106,6 +111,7 @@ parse_and_dispatch() {
     #
     _b="$(asdf which "$man_page" 2>/dev/null)"
     bp_tmux_cmd="${_b%/bin/*}"
+    # dbg_display bp_tmux_cmd
 
     if [ -n "$alt_version" ]; then
         if [ "$alt_version" = "system" ]; then
@@ -143,7 +149,11 @@ parse_and_dispatch() {
     [ -z "$f_man" ] && error_msg "man_page not found in ${man_path}/man1"
 
     echo "Displaying asdf man page for: $man_page $version"
-    $real_man -M "$man_path" "$man_section" "$f_man"
+    if [ -n "$man_section" ]; then
+        $real_man -M "$man_path" "$man_section" "$man_page"
+    else
+        $real_man -M "$man_path" "$man_page"
+    fi
 }
 
 #================================================================
@@ -151,13 +161,14 @@ parse_and_dispatch() {
 #   Main
 #
 
-prog_name=$(basename "$0")
+prog_name="man-asdf"
 use_orig_man_ex_code=43
 
 # ignore any aliases and skip this custom man, find the real one
 # shellcheck disable=SC2230
 real_man="$(which -a man | grep ^/ | grep -v "$0" | tail -n 1)"
 [ -z "$real_man" ] && error_msg "no system man command found"
+# dbg_display real_man
 
 # First try custom handler
 parse_and_dispatch "$@"
@@ -168,5 +179,5 @@ case "$ex_code" in
         orig_man "$@"
         ;;
     0) ;; # asdf man page was displayed with no errors
-    *) error_msg "Uncaught man_asdf error: $ex_code" ;;
+    *) error_msg "Uncaught $prog_name error: $ex_code" ;;
 esac
