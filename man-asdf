@@ -142,7 +142,8 @@ parse_and_dispatch() {
 
     man_path="${bp_tmux_cmd}/$man_base_path"
     [ ! -d "$man_path" ] && {
-        error_msg "this asdf command does not seem to have any man page"
+        # error_msg "this asdf command does not seem to have any man page"
+        return "$use_orig_man_ex_code"
     }
 
     f_man=$(find "${man_path}/man1" -mindepth 1 -print -quit)
